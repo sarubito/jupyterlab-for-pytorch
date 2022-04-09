@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  py3:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    #restart: always
+    tty: true
+    ## nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: ["gpu"]
+
+    ## (アクセスモードの指定)ホスト側:コンテナ側:アクセスモード(読み込専用 ro(read only) 読み書き rw(read write))
+    volumes:
+      - ${PWD}/workspace:/root/workspace:rw
+    #   - /dev:/dev:rw
+    #   - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    # environment:
+    #   - DISPLAY=${DISPLAY}
+    privileged: true
+    # entrypoint: >
+    #   jupyter-lab
+    #   --allow-root
+    #   --ip=0.0.0.0
+    #   --port=8888
+    #   --no-browser
+    #   --NotebookApp.token=''
+
+    ## コンテナ側のポートをホストマシンに露出
+    expose:
+      - "8888"
+    ## 露出されたポートとホストマシンのポートを結ぶ
+    ports:
+      - "127.0.0.1:8888:8888"
